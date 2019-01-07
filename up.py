@@ -20,11 +20,8 @@ UNSPLASH_SEARCH = \
 
 def upload_image(query):
     url = "%s%s" % (UNSPLASH_SEARCH, query)
-    print(url)
-    c = (requests.get(url).json()['results'])
-    durl = (c[0]['urls']['regular'])
-
-    print(durl)
+    c = requests.get(url).json()['results']
+    durl = c[0]['urls']['regular']
 
     new_filename = "%s_%s.jpg" % (query, int(time.time()))
 
@@ -32,24 +29,21 @@ def upload_image(query):
     with open('/tmp/%s'%new_filename, 'wb') as f:
         f.write(r.content)
 
-    print("WROTE %s", MINIO_ACCESS_KEY)
 
     minioClient = Minio(MINIO_API_URL,
                   access_key=MINIO_ACCESS_KEY,
                   secret_key=MINIO_SECRET_KEY,
                   secure=False)
-    print("WROTE BEFORE TRY")
     return(new_filename)
     
     try:
         minioClient.make_bucket("devcarpettest")
     except BucketAlreadyOwnedByYou as err:
-        print("Already")
         pass
     except BucketAlreadyExists as err:
-        print("Already")    
-    except ResponseError as err:
-        print("FUUUUUUUUCK")
+        pass
+      except ResponseError as err:
+        print("Error bucket")
 
         raise
     else:
